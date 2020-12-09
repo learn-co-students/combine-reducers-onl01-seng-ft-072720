@@ -1,39 +1,42 @@
-export default function bookApp(
-  state = {
-    authors: [],
-    books: []
-  },
-  action
-) {
-  let idx;
-  switch (action.type) {
-    case "ADD_BOOK":
-      return {
-        ...state,
-        books: [...state.books, action.book]
-      };
+import { combineReducers } from 'redux'
+import uuid from 'uuid'
 
-    case "REMOVE_BOOK":
-      idx = state.books.findIndex(book => book.id === action.id);
-      return {
-        ...state,
-        books: [...state.books.slice(0, idx), ...state.books.slice(idx + 1)]
-      };
+const rootReducer = combineReducers({
+  books: booksReducer,
+  authors: authorsReducer
+});
 
-    case "ADD_AUTHOR":
-      return {
-        ...state,
-        authors: [...state.authors, action.author]
-      };
+export default rootReducer
 
-    case "REMOVE_AUTHOR":
-      idx = state.authors.findIndex(author => author.id === action.id);
-      return {
-        ...state,
-        authors: [...state.authors.slice(0, idx), ...state.authors.slice(idx + 1)]
-      };
-
+function booksReducer(state = [], action) {
+  let index;
+  switch(action.type) {
+    case 'ADD_BOOK':
+      return [...state, ...action.book];
+    case 'REMOVE_BOOK':
+      index = state.findIndex(book => book.id === action.id)
+      return [...state.slice(0, index), ...state.slice(index + 1)]
     default:
+      return state;
+  }
+}
+
+function authorsReducer(state = [], action) {
+  let index;
+  switch(action.type) {
+    case 'ADD_AUTHOR':
+      return [...state, action.author]
+    case 'REMOVE_AUTHOR':
+      index = state.authors.findIndex(author => author.id === action.id)
+      return [...state.slice(0, index), ...state.authors.slice(index + 1)]
+    case 'ADD_BOOK':
+      let existingAuthor = state.filter(author => author.authorName === action.book.authorName)
+      if (existingAuthor.length > 0) {
+        return state;
+      } else {
+        return [...state, {authorname: action.book.authorName, uuid: uuid()}]
+      }
+    default: 
       return state;
   }
 }
